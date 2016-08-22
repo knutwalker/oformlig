@@ -1,4 +1,5 @@
 import org.scalatest.{ FlatSpec, Matchers }
+import shapeless.test.illTyped
 
 object PluckSpec extends Matchers {
   case class Foo(foo: String, bar: Int, baz: Boolean)
@@ -41,15 +42,11 @@ final class PluckSpec extends FlatSpec with Matchers {
   }
 
   it should "fail to compile when field does not exist" in {
-    import shapeless.test.illTyped
-
     illTyped("Pluck.pluck(xs, \"blubb\")",
       ".*Foo does not have a field String\\(\"blubb\"\\)\\.")
   }
 
   it should "fail to compile when target type does not conform to field type" in {
-    import shapeless.test.illTyped
-
     illTyped("Pluck.pluck(xs, \"foo\"): List[Int]",
       "type mismatch.*found.*List\\[String\\].*required.*List\\[Int\\]")
   }
