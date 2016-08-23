@@ -1,14 +1,10 @@
 package demo
 
 import org.scalatest.{ FlatSpec, Matchers }
-import shapeless.test.illTyped
+import shapeless.test.{ illTyped, typed }
 
 object PluckSpec extends Matchers {
   case class Foo(foo: String, bar: Int, baz: Boolean)
-
-  implicit final class TypedOps[A](private val x: A) extends AnyVal {
-    def shouldTypeEqual(y: A) = x shouldBe y
-  }
 }
 final class PluckSpec extends FlatSpec with Matchers {
   import PluckSpec._
@@ -21,8 +17,12 @@ final class PluckSpec extends FlatSpec with Matchers {
     val foos = Pluck.pluck(xs, "foo")
 
     foos should have size 2
-    foos(0) shouldTypeEqual "f"
-    foos(1) shouldTypeEqual "g"
+
+    foos(0) shouldBe "f"
+    typed[String](foos(0))
+
+    foos(1) shouldBe "g"
+    typed[String](foos(1))
   }
 
   it should "get all 'bar' items with proper type" in {
@@ -30,8 +30,12 @@ final class PluckSpec extends FlatSpec with Matchers {
     val foos = Pluck.pluck(xs, "bar")
 
     foos should have size 2
-    foos(0) shouldTypeEqual 42
-    foos(1) shouldTypeEqual 1337
+
+    foos(0) shouldBe 42
+    typed[Int](foos(0))
+
+    foos(1) shouldBe 1337
+    typed[Int](foos(1))
   }
 
   it should "get all 'baz' items with proper type" in {
@@ -39,8 +43,12 @@ final class PluckSpec extends FlatSpec with Matchers {
     val foos = Pluck.pluck(xs, "baz")
 
     foos should have size 2
-    foos(0) shouldTypeEqual true
-    foos(1) shouldTypeEqual false
+
+    foos(0) shouldBe true
+    typed[Boolean](foos(0))
+
+    foos(1) shouldBe false
+    typed[Boolean](foos(1))
   }
 
   it should "fail to compile when field does not exist" in {
