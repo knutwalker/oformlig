@@ -5,6 +5,7 @@
           scalaVersion := V.scala
            logBuffered := false
            shellPrompt := prompt
+       initialCommands := "import demo._"
         scalacOptions ++= scalacFlags
   libraryDependencies ++= L.core
         scalacOptions  in (Compile, console) ~= (_ filterNot (x => x == "-Xfatal-warnings" || x.startsWith("-Ywarn")))
@@ -50,7 +51,6 @@ lazy val prompt: State => String = state => {
   import scala.Console._
   val extracted = Project.extract(state)
   val reader = extracted.get(_root_.com.typesafe.sbt.SbtGit.GitKeys.gitReader)
-  val dir = extracted.get(baseDirectory)
   val name = extracted.get(Keys.name)
   val branch = reader.withGit(_.branch)
   s"[$CYAN$name$RESET] ($MAGENTA$branch$RESET)> "
