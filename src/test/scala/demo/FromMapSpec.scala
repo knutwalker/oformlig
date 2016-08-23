@@ -1,3 +1,5 @@
+package demo
+
 import validation.Result.{ Invalid, Invalids, Valid }
 
 import org.scalatest.{ FlatSpec, Inside, Matchers }

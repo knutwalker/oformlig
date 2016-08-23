@@ -1,3 +1,4 @@
+package demo
 
 import shapeless._
 import shapeless.labelled._

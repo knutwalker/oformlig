@@ -1,3 +1,5 @@
+package demo
+
 import org.scalatest.{ FlatSpec, Matchers }
 import shapeless.test.illTyped
 

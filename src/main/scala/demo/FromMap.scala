@@ -1,3 +1,4 @@
+package demo
 
 import validation.Result
 import validation.Result.fromOption
