@@ -1,23 +1,18 @@
-                  name := "oformlig"
-          organization := "de.knutwalker"
-             startYear := Some(2016)
-           description := "Shapless Talk"
-          scalaVersion := V.scala
-           logBuffered := false
-           shellPrompt := prompt
-       initialCommands := "import demo._"
-        scalacOptions ++= scalacFlags
-  libraryDependencies ++= L.core
-        scalacOptions  in (Compile, console) ~= (_ filterNot (x => x == "-Xfatal-warnings" || x.startsWith("-Ywarn")))
-        scalacOptions  in (Test, console)    ~= (_ filterNot (x => x == "-Xfatal-warnings" || x.startsWith("-Ywarn")))
-        scalacOptions  in Test               ~= (xs => xs.filterNot(x => x == "-Xfatal-warnings" || x.startsWith("-Ywarn")) :+ "-Yrangepos")
-                  fork in run                := true
-          connectInput in run                := true
+                  name  := "oformlig"
+           description  := "Shapless Talk"
+           logBuffered  := false
+           shellPrompt  := prompt
+          scalaVersion  := V.scala
+          organization  := "de.knutwalker"
+         scalacOptions  += "-Yliteral-types"
+         scalacOptions ++= scalacFlags
+       initialCommands  := "import demo._"
+     scalaOrganization  := "org.typelevel"
+   libraryDependencies ++= L.core
 
 
 lazy val scalacFlags = Seq(
   "-deprecation",
-  "-explaintypes",
   "-feature",
   "-unchecked",
   "-encoding", "UTF-8",
@@ -27,20 +22,13 @@ lazy val scalacFlags = Seq(
   "-language:postfixOps",
   "-Xlint:_",
   "-Xfuture",
-  "-Xfatal-warnings",
   "-Yclosure-elim",
   "-Yconst-opt",
   "-Ydead-code",
   "-Yno-adapted-args",
   "-Ypatmat-exhaust-depth", "42",
-  "-Ywarn-inaccessible",
-  "-Ywarn-nullary-override",
-  "-Ywarn-nullary-unit",
-  "-Ywarn-dead-code",
   "-Ywarn-infer-any",
   "-Ywarn-adapted-args",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
   "-target:jvm-1.8",
   "-Xexperimental",
   "-Ybackend:GenBCode",
