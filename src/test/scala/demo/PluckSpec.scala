@@ -8,13 +8,14 @@ object PluckSpec extends Matchers {
 }
 final class PluckSpec extends FlatSpec with Matchers {
   import PluckSpec._
+  import Pluck.syntax
   val xs = List(Foo("f", 42, baz = true), Foo("g", 1337, baz = false))
 
   behavior of "Pluck"
 
   it should "get all 'foo' items with proper type" in {
 
-    val foos = Pluck.pluck(xs, "foo")
+    val foos = xs pluck "foo"
 
     foos should have size 2
 
@@ -27,7 +28,7 @@ final class PluckSpec extends FlatSpec with Matchers {
 
   it should "get all 'bar' items with proper type" in {
 
-    val foos = Pluck.pluck(xs, "bar")
+    val foos = xs pluck "bar"
 
     foos should have size 2
 
@@ -40,7 +41,7 @@ final class PluckSpec extends FlatSpec with Matchers {
 
   it should "get all 'baz' items with proper type" in {
 
-    val foos = Pluck.pluck(xs, "baz")
+    val foos = xs pluck "baz"
 
     foos should have size 2
 
@@ -52,12 +53,12 @@ final class PluckSpec extends FlatSpec with Matchers {
   }
 
   it should "fail to compile when field does not exist" in {
-    illTyped("Pluck.pluck(xs, \"blubb\")",
-      ".*Foo does not have a field String\\(\"blubb\"\\)\\.")
+    illTyped("xs.pluck(\"blubb\")",
+      ".*Foo does not have a field \"blubb\"\\.")
   }
 
   it should "fail to compile when target type does not conform to field type" in {
-    illTyped("Pluck.pluck(xs, \"foo\"): List[Int]",
+    illTyped("xs.pluck(\"foo\"): List[Int]",
       "type mismatch.*found.*List\\[String\\].*required.*List\\[Int\\]")
   }
 }
