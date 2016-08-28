@@ -20,6 +20,9 @@ object HasId {
     implicit
     gen: LabelledGeneric.Aux[A, R],
     sel: Selector.Aux[R, Witness.`'id`.T, Int]
+    // this should actually be
+    // sel: Selector.Aux[R, 'id, Int]
+    // but a weird bug is preventing this
   ): HasId[A] = a => sel(gen.to(a))
 
   implicit def hasIdCoproduct[A, Repr <: Coproduct](
@@ -32,7 +35,6 @@ object HasId {
 
   implicit def hasIdCCons[K <: Symbol, L, R <: Coproduct](
     implicit
-    K: Witness.Aux[K],
     L: Lazy[HasId[L]],
     R: Lazy[HasId[R]]
   ): HasId[FieldType[K, L] :+: R] = {
