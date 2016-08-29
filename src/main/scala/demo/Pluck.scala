@@ -1,5 +1,7 @@
 package demo
 
+import cats.Functor
+
 import shapeless._
 import shapeless.labelled._
 import shapeless.tag._
@@ -7,43 +9,45 @@ import shapeless.tag._
 import scala.annotation.implicitNotFound
 
 
-trait Pluck[L <: HList, K] {
+trait Pluck[Repr <: HList, Field] {
   type Out
-  def apply(l: L): Out
+  def apply(l: Repr): Out
 }
 
 object Pluck {
-  type Aux[L <: HList, K, Out0] = Pluck[L, K] {type Out = Out0}
+  type Aux[Repr <: HList, Field, Out0] = Pluck[Repr, Field] {type Out = Out0}
 
-  @implicitNotFound("${A} does not have a field ${F}.")
-  type PrettyAux[A, F, L <: HList, K, Out0] = Pluck[L, K] {type Out = Out0}
+  @implicitNotFound("${Type} does not have a field ${FieldName}.")
+  type PrettyAux[Type, FieldName, Repr <: HList, Field, Out0] = Pluck[Repr, Field] {type Out = Out0}
 
-  def apply[A, Field <: Singleton, Repr <: HList, Out](xs: List[A], field: Field)(
+  def apply[F[_], Type, Field <: Singleton, Repr <: HList, Out](xs: F[Type], field: Field)(
     implicit
-    gen: LabelledGeneric.Aux[A, Repr],
-    pluck: Pluck.PrettyAux[A, Field, Repr, Symbol @@ Field, Out]
-  ): List[Out] = xs.map(x => pluck(gen.to(x)))
+    functor: Functor[F],
+    gen: LabelledGeneric.Aux[Type, Repr],
+    pluck: Pluck.PrettyAux[Type, Field, Repr, Symbol @@ Field, Out]
+  ): F[Out] = functor.map(xs)(x => pluck(gen.to(x)))
 
-  implicit def headByName[T <: HList, K, V]: Aux[FieldType[K, V] :: T, K, V] =
-    new Pluck[FieldType[K, V] :: T, K] {
-      type Out = V
-      def apply(l: FieldType[K, V] :: T): Out = l.head
+  implicit def pluckHead[Tail <: HList, Field, Out0]: Aux[FieldType[Field, Out0] :: Tail, Field, Out0] =
+    new Pluck[FieldType[Field, Out0] :: Tail, Field] {
+      type Out = Out0
+      def apply(l: FieldType[Field, Out0] :: Tail): Out = l.head
     }
 
-  implicit def tailByName[H, T <: HList, K](
+  implicit def pluckTail[Head, Tail <: HList, Field](
     implicit
-    fbn: Pluck[T, K]
-  ): Aux[H :: T, K, fbn.Out] =
-    new Pluck[H :: T, K] {
-      type Out = fbn.Out
-      def apply(l: H :: T): Out = fbn(l.tail)
+    pluck: Pluck[Tail, Field]
+  ): Aux[Head :: Tail, Field, pluck.Out] =
+    new Pluck[Head :: Tail, Field] {
+      type Out = pluck.Out
+      def apply(l: Head :: Tail): Out = pluck(l.tail)
     }
 
-  implicit final class syntax[A](private val xs: List[A]) extends AnyVal {
+  implicit final class syntax[F[_], A](private val xs: F[A]) extends AnyVal {
     def pluck[Field <: Singleton, Repr <: HList, Out](field: Field)(
       implicit
+      functor: Functor[F],
       gen: LabelledGeneric.Aux[A, Repr],
       pluck: Pluck.PrettyAux[A, Field, Repr, Symbol @@ Field, Out]
-    ): List[Out] = apply[A, Field, Repr, Out](xs, field)
+    ): F[Out] = apply[F, A, Field, Repr, Out](xs, field)
   }
 }

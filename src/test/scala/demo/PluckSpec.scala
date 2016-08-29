@@ -14,6 +14,7 @@ final class PluckSpec extends FlatSpec with Matchers {
   behavior of "Pluck"
 
   it should "get all 'foo' items with proper type" in {
+    import cats.std.list._
 
     val foos = xs pluck "foo"
 
@@ -27,6 +28,7 @@ final class PluckSpec extends FlatSpec with Matchers {
   }
 
   it should "get all 'bar' items with proper type" in {
+    import cats.std.list._
 
     val foos = xs pluck "bar"
 
@@ -40,6 +42,7 @@ final class PluckSpec extends FlatSpec with Matchers {
   }
 
   it should "get all 'baz' items with proper type" in {
+    import cats.std.list._
 
     val foos = xs pluck "baz"
 
@@ -52,12 +55,51 @@ final class PluckSpec extends FlatSpec with Matchers {
     typed[Boolean](foos(1))
   }
 
+  it should "work for everything that has a functor instance" in {
+    import cats.std.option._
+
+    val foo = Option(Foo("bernd", 42, true)) pluck "foo"
+
+    foo shouldBe Some("bernd")
+    typed[String](foo.get)
+  }
+
+  it should "work for shapeless derived functor instances" in {
+    import cats.derived.functor._
+    import cats.derived.functor.legacy._
+
+    case class Bar[A](xs: List[A], s: Option[A])
+    val bar = Bar(
+      List(
+        Foo("bernd", 42, baz = true),
+        Foo("ralle", 1337, baz = false)
+      ),
+      Some(
+        Foo("bippy", 12, true)
+      )) pluck "foo"
+
+    bar shouldBe Bar(List("bernd", "ralle"), Some("bippy"))
+
+    bar.xs(0) shouldBe "berd"
+    typed[String](bar.xs(0))
+
+    bar.xs(1) shouldBe "ralle"
+    typed[String](bar.xs(1))
+
+    bar.s.get shouldBe "bippy"
+    typed[String](bar.s.get)
+  }
+
   it should "fail to compile when field does not exist" in {
+    import cats.std.list._
+
     illTyped("xs.pluck(\"blubb\")",
       ".*Foo does not have a field \"blubb\"\\.")
   }
 
   it should "fail to compile when target type does not conform to field type" in {
+    import cats.std.list._
+
     illTyped("xs.pluck(\"foo\"): List[Int]",
       "type mismatch.*found.*List\\[String\\].*required.*List\\[Int\\]")
   }
